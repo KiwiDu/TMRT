@@ -19,8 +19,30 @@ const resizeRendererToDisplaySize = function (renderer) {
     return needResize
 }
 
+const absGrad = (t) => {
+    const gradiant = [{ color: '0059F2', t: -200 },
+    { color: '0059F2', t: -40 }, { color: '60B7FF', t: 0 },
+    { color: '8DFF71', t: 20 }, { color: 'FFF73F', t: 40 }, { color: 'FF6E2F', t: 65 },
+    { color: 'EA4430', t: 90 }, { color: 'EA4430', t: 200 },]
+
+    let range = []
+    for (const [i, point] of gradiant.entries()) {
+        if (t <= point.t) {
+            range.push(gradiant[i - 1])
+            range.push(point)
+            break
+        }
+    }
+    let ratio = (t - range[0].t) / (range[1].t - range[0].t)
+    let colors = range.map(v => new THREE.Color(`#${v.color}`))
+    let result = new THREE.Color()
+    result.lerpColors(...colors, ratio)
+    return result
+}
+
 let camera, scene, renderer, clock, gui
 let human, room
+
 
 const room_dim = {
     l: 2,
@@ -59,7 +81,9 @@ trans.updateTMRT = () => {
         if (trans.mrt[k]) {
             value = trans.mrt[k]
         }
-        document.getElementById(k).innerHTML = value
+        let theSpan = document.getElementById(k)
+        theSpan.innerHTML = value
+        theSpan.setAttribute('style', `background-color:${absGrad(value).getStyle()}`)
     }
 }
 
@@ -105,8 +129,17 @@ function initAndLoadHuman() {
 
 function initRoom() {
     const geometry = new THREE.BoxGeometry(1, 1, 1)
-    const material = new THREE.MeshPhongMaterial({ color: 0xF0EBE6, transparent: true, opacity: 0.2, side: THREE.DoubleSide })
-    const room_mesh = new THREE.Mesh(geometry, material)
+    const common_material = new THREE.MeshPhongMaterial({ color: 0xF0EBE6, transparent: true, opacity: 0.2, side: THREE.DoubleSide })
+    const highlight_material = new THREE.MeshBasicMaterial({ color: 0xFF0000, side: THREE.DoubleSide })
+
+    const materials = []
+    for (let i = 0; i < 6; i++) {
+        materials.push(common_material)
+    }
+    materials.push(highlight_material)
+
+    const room_mesh = new THREE.Mesh(geometry, materials)
+
     return room_mesh
 }
 
@@ -154,9 +187,23 @@ function initGUI() {
 
     const folder3 = gui.addFolder("Surfaces Settings")
     const surface_floders = { ceil: "Ceiling", floor: "Floor", l_wall: "Left Wall", r_wall: "Right Wall", f_wall: "Front Wall", b_wall: "Back Wall" }
+    const surface_order = { l_wall: 0, r_wall: 1, ceil: 2, floor: 3, f_wall: 4, b_wall: 5 }
+
     for (let type in surface_floders) {
         let folder = folder3.addFolder(surface_floders[type])
-        folder.add(surface_args[type], "t", -100, 100, 0.01).name("Temperature(Celsius):")
+        folder.add(surface_args[type], "t", -50, 100, 0.01).name("Temperature(Celsius):")
+            .onChange(value => {
+                let order = surface_order[type]
+                if (room.material[order] == room.material[(order + 1) % 6]) {
+                    room.material[order] = room.material[6]//The senventh material is the hightlight
+                }
+                room.material[order].color.copy(absGrad(value))
+            })
+            .onFinishChange(_ => {
+                let order = surface_order[type]
+                room.material[order] = room.material[(order + 1) % 6]
+
+            })
         folder.add(surface_args[type], "e", 0, 1, 0.01).name("Emissivity:")
     }
 
@@ -171,7 +218,7 @@ function init() {
     camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000)
     camera.position.set(18, 6, 18)
     camera.layers.enableAll()
-    //camera.lookAt(0, -5, 0)
+    camera.lookAt(0, 1, 0)
 
     scene = new THREE.Scene()
     scene.background = new THREE.Color(0xf0f0f0)
@@ -231,7 +278,8 @@ function init() {
     //controls.enablePan = false
     controls.minDistance = 5
     controls.maxDistance = 50
-    //controls.target.y = -5
+    controls.target.y = 1
+    controls.update()
 
     //
     initInstance()
