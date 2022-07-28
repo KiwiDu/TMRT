@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>TMRT Simulation app</title>
+    <style>
+        html,
+        body {
+            margin: 0;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .f {
+            position: absolute;
+            left: 1.5rem;
+            top: 1rem;
+        }
+
+        td {
+            font-size: 1.2em;
+            text-align: right;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="f">
+        <table>
+            <tr>
+                <th>TMRT (in Celsius)</th>
+            </tr>
+            <tr>
+                <td>Head: </td>
+                <td><span id="head">-</span></td>
+            </tr>
+            <tr>
+                <td>Chest: </td>
+                <td><span id="chest">-</span></td>
+            </tr>
+            <tr>
+                <td>Abdomen: </td>
+                <td><span id="abdomen">-</span></td>
+            </tr>
+            <tr>
+                <td>Back: </td>
+                <td><span id="back">-</span></td>
+            </tr>
+            <tr>
+                <td>Upper arms: </td>
+                <td><span id="l_upperarm">-</span> / <span id="r_upperarm">-</span></td>
+            </tr>
+            <tr>
+                <td>Fore arms: </td>
+                <td><span id="l_forearm">-</span> / <span id="r_forearm">-</span></td>
+            </tr>
+            <tr>
+                <td>Hands: </td>
+                <td><span id="l_hand">-</span> / <span id="r_hand">-</span></td>
+            </tr>
+            <tr>
+                <td>Thighs: </td>
+                <td><span id="l_thigh">-</span> / <span id="r_thigh">-</span></td>
+            </tr>
+            <tr>
+                <td>Legs: </td>
+                <td><span id="l_leg">-</span> / <span id="r_leg">-</span></td>
+            </tr>
+            <tr>
+                <td>Feet: </td>
+                <td><span id="l_foot">-</span> / <span id="r_foot">-</span></td>
+            </tr>
+        </table>
+    </div>
+    <!--script src="./main.js" type="module"></script-->
+
+</body>
+
+</html>
